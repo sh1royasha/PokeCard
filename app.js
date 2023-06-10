@@ -7,12 +7,21 @@ function iniciarApp(){
     search.addEventListener('click',buscarPokemon);
 
     function buscarPokemon(){
-
         const pokemon = document.querySelector('#pokemon').value;
         const url = `https://pokeapi.co/api/v2/pokemon/${pokemon}`;
 
         if(pokemon === '')
         return;
+
+        active(card);
+        spiner(body);
+        myFecth(url);
+    }
+
+    function myFecth(url){
+
+    const spin = document.querySelector('.spinner');
+    spin.style.display="block";
 
         fetch(url)
         .then((response)=>{
@@ -21,50 +30,54 @@ function iniciarApp(){
             }
             return response.json();
         })
-        .then((data)=> mostrarPokemon(data))
-        .catch((error)=> console.error(error));
-
+        .then((data)=> {
+            mostrarPokemon(data)
+            spin.style.display="none";
+        })
+        .catch((error)=> {
+            erro404()
+        })
     }
 
-    function mostrarPokemon(e){
+    function mostrarPokemon(element){
         
         limpiarHtml(body)
 
-        const {name, sprites, types} = e;
+        const {name, sprites, types, height, weight} = element;
         const image = sprites.other.home['front_default'];
 
+        // imagen 
         const imagenPokemon = document.createElement('IMG');
         imagenPokemon.alt = `Imagen de ${name}`;
         imagenPokemon.src = image;
         
-        // console.log(types)
-
+        // Nombre
         const nombrePokemon = document.createElement('H3')
         nombrePokemon.textContent = name;
-
-        const tiposPokemon = document.createElement('DIV')
         
+
+        // Tipos
+        const tiposPokemon = document.createElement('DIV')
         const tipos = tipoPokemon(types);
 
         tipos.forEach(tipo=>{
             const nombreTipo = tipo.nombre;
-            const label = document.createElement('BUTTON');
-            label.textContent = nombreTipo;
-            label.style.background = `${tipo.color}`
-            tiposPokemon.appendChild(label)
+            const button = document.createElement('BUTTON');
+            button.textContent = nombreTipo;
+            button.style.background = `${tipo.color}`
+            tiposPokemon.appendChild(button)
         })
 
+        // Activar estilos
+        active(imagenPokemon);
+        active(card);
+        active(body);
 
-
-        // console.log(tiposPokemon)
-
+        // Incrustar componentes
         body.appendChild(imagenPokemon)
         body.appendChild(nombrePokemon)
         body.appendChild(tiposPokemon)
 
-        imagenPokemon.classList.add("active")
-        card.classList.add("active")
-        body.classList.add("active")
     }
 
     const tipoPokemon = function(elements){
@@ -109,6 +122,31 @@ function iniciarApp(){
             selector.removeChild(selector.firstChild);
         }
     }
+
+    function erro404(){
+        body.classList.add("active")
+        card.classList.add("active")
+        body.innerHTML = `
+            <img src="./img/error.png" alt="404-error">
+            <h3>Upps!, No se encontro el pokemon deseado</h3>
+        `
+        spin.style.display="none";
+    }
+
+    function active(element){
+        element.classList.add("active");
+    }
+
+    function spiner(element){
+        element.innerHTML = `
+        <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+        </div>
+    `
+    }
+    
 }
 
 document.addEventListener('DOMContentLoaded',iniciarApp);
